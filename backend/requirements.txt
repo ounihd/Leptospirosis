@@ -15,9 +15,11 @@ google-cloud-storage==3.6.0
 google-crc32c==1.7.1
 google-resumable-media==2.8.0
 googleapis-common-protos==1.72.0
+gunicorn==23.0.0
 httplib2==0.31.0
 idna==3.11
 numpy==2.3.5
+packaging==25.0
 pandas==2.3.3
 proto-plus==1.26.1
 protobuf==6.33.1
@@ -35,5 +37,3 @@ tzdata==2025.2
 uritemplate==4.2.0
 urllib3==2.5.0
 xgboost==3.1.1
-gunicorn
-
