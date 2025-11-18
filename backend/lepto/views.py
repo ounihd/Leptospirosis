@@ -594,6 +594,8 @@ def forest_loss_percentage(location: ee.Geometry, year: int) -> Dict[str, Any]:
 # HTTP View
 # ---------------------------------------------------------------------------
 
+import gc  # Add this import
+
 @method_decorator(csrf_exempt, name="dispatch")
 class PrecipitationView(View):
     """
@@ -655,19 +657,44 @@ class PrecipitationView(View):
 
             logger.info("Processing %s (%s): %s to %s", region_id, version, start_date, end_date)
 
-            # Compute metrics
-            res_precip = prec(geom, start_date, end_date)
-            res_prev_precip = prec(geom, prev_start, prev_end)
-            res_three_precip = prec(geom, three_start, three_end)
-            res_temp = temp(geom, start_date, end_date)
-            res_soil_moist = soil_moisture(geom, start_date, end_date)
-            res_soil_temp = soil_temp(geom, start_date, end_date)
-            res_ndwi = ndwi(geom, start_date, end_date)
-            res_ndvi = ndvi(geom, start_date, end_date)
+            # Helper to compute a metric sequentially and clear memory
+            def compute_and_clear(func, *args, **kwargs):
+                result = func(*args, **kwargs)
+                gc.collect()  # Force garbage collection
+                return result
+
+            # Compute metrics sequentially, saving results lightly and clearing memory
+            res_precip = compute_and_clear(prec, geom, start_date, end_date)
+            del geom  # Clear geom if not needed further (recreate if needed)
+            gc.collect()
+
+            res_prev_precip = compute_and_clear(prec, ee.Geometry(feature["geometry"]), prev_start, prev_end)
+            gc.collect()
+
+            res_three_precip = compute_and_clear(prec, ee.Geometry(feature["geometry"]), three_start, three_end)
+            gc.collect()
+
+            res_temp = compute_and_clear(temp, ee.Geometry(feature["geometry"]), start_date, end_date)
+            gc.collect()
+
+            res_soil_moist = compute_and_clear(soil_moisture, ee.Geometry(feature["geometry"]), start_date, end_date)
+            gc.collect()
+
+            res_soil_temp = compute_and_clear(soil_temp, ee.Geometry(feature["geometry"]), start_date, end_date)
+            gc.collect()
+
+            res_ndwi = compute_and_clear(ndwi, ee.Geometry(feature["geometry"]), start_date, end_date)
+            gc.collect()
+
+            res_ndvi = compute_and_clear(ndvi, ee.Geometry(feature["geometry"]), start_date, end_date)
+            gc.collect()
 
             year = int(start_date[:4])
-            res_lc = land_cover_percentages(geom, year)
-            res_loss = forest_loss_percentage(geom, year)
+            res_lc = compute_and_clear(land_cover_percentages, ee.Geometry(feature["geometry"]), year)
+            gc.collect()
+
+            res_loss = compute_and_clear(forest_loss_percentage, ee.Geometry(feature["geometry"]), year)
+            gc.collect()
 
             # Fetch population density
             population_density = get_population_density(region_id, year)
