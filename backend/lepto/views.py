@@ -19,6 +19,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from functools import lru_cache
 
+import os
+import json
+from google.oauth2 import service_account
+
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
@@ -27,14 +31,14 @@ logger = logging.getLogger(__name__)
 
 _ee_initialized = False
 
-def ensure_ee_initialized() -> None:
-    """Initialize Earth Engine once per process."""
-    global _ee_initialized
-    if not _ee_initialized:
-        project = getattr(settings, "GEE_PROJECT", "ee-hd-leptospirosis")
-        ee.Initialize(project=project)
-        _ee_initialized = True
-        logger.info("Earth Engine initialized with project: %s", project)
+def ensure_ee_initialized():
+    if not ee.data._initialized:
+        creds_json = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+        if creds_json:
+            creds = service_account.Credentials.from_service_account_info(json.loads(creds_json))
+            ee.Initialize(credentials=creds, project='ee-hd-leptospirosis')
+        else:
+            ee.Initialize(project='ee-hd-leptospirosis')
 
 # ---------------------------------------------------------------------------
 # ML Model Loading
