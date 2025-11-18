@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-wc$7+m^5mpyqmn2ck8gf(wcy11clsi067(1&w10toon_br+k3j'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False  # Changed to False for production
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['leptospirosis-risk-predictor.onrender.com']  # Added for Render deployment
 
 
 # Application definition
@@ -128,4 +128,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'https://leptospirosis.onrender.com',  # Added for deployed frontend
 ]

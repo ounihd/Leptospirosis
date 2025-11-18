@@ -145,7 +145,7 @@ function App() {
       setLoading(true);
       setError(null);
 
-      const res = await fetch('http://localhost:8000/lepto/precipitation/', {
+      const res = await fetch('https://leptospirosis-risk-predictor.onrender.com/lepto/precipitation/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
