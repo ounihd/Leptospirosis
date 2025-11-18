@@ -36,7 +36,10 @@ def ensure_ee_initialized():
     if not _ee_initialized:
         creds_json = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
         if creds_json:
-            creds = service_account.Credentials.from_service_account_info(json.loads(creds_json))
+            creds = service_account.Credentials.from_service_account_info(
+                json.loads(creds_json),
+                scopes=['https://www.googleapis.com/auth/earthengine']
+            )
             ee.Initialize(credentials=creds, project='ee-hd-leptospirosis')
         else:
             ee.Initialize(project='ee-hd-leptospirosis')
